@@ -1,0 +1,87 @@
+---
+- name: "Configuration d'un poste Linux pour E3S"
+  hosts: "{{ target }}"
+  vars_files:
+    - ../credentials/credentials.yml
+  vars:
+    - domain_ad: "e3s.intranet"
+    - zabbix_server_ip: "monit01.{{ domain_ad }}"
+    - hostname : "{{ inventory_hostname }}"
+    - glpi_url: "glpi.{{ domain_ad }}"
+  collections: 
+    - Forkuranto.zabbix
+
+  tasks:
+    - name: Block config
+      block:
+
+        - name: changement de nom
+          hostname:
+            name: '{{ hostname }}'
+
+        - name: Create database server record
+          community.windows.win_dns_record:
+            name: "{{ inventory_hostname }}"
+            type: "A"
+            value: "{{ ansible_host }}"
+            zone: "{{ domain_ad }}"
+          delegate_to: AD01
+      become: yes
+     
+    
+    - name: Zabbix Agent
+      block:
+        - name: Zabbix agent installation
+          package: 
+            name: zabbix-agent
+            state: present
+
+        - name: import role for zabbix agent config
+          import_role:
+            name: Forkuranto.zabbix.AgentConfig
+
+        # - name: edit Agent Configuration
+        #   template:
+        #     src: zabbix_agent.j2
+        #     dest: /etc/zabbix/zabbix_agent.conf
+        #     group: root
+        #     user: root
+        #     mode: 0640
+        #     backup: yes
+        # - name: restart service
+        #   systemd:
+        #     name: zabbix-agent
+        #     state: restart            
+      when: ansible_distribution == 'Debian'
+      become: yes
+        
+    
+    - name: FusionInventory Agent
+      block:
+        - name: FusionInventory agent installation
+          package: 
+            name: fusioninventory-agent
+            state: present
+        
+        - name: edit Agent Configuration
+          template:
+            src: FusionInventory_agent.j2
+            dest: /etc/fusioninventory/agent.cfg
+            group: root
+            owner: root
+            mode: u=rw,g=r,o=r
+            backup: yes
+        - name: restart service
+          systemd:
+            name: fusioninventory-agent
+            state: restarted            
+      when: ansible_distribution == 'Debian'
+      become: yes
+
+    - name: Create database server record
+      community.windows.win_dns_record:
+        name: "{{ inventory_hostname }}"
+        type: "A"
+        value: "{{ ansible_host }}"
+        zone: "{{ domain_ad }}"
+      delegate_to: AD01

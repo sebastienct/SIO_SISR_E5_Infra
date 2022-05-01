@@ -1,0 +1,65 @@
+---
+- name: 'Installation complete + ajout dans infra '
+  hosts: "{{ target }}"
+  vars:
+    - multipackage_install: True
+    - sshPort: 22 
+    - packages_install: False
+    - virtualbox_install: False
+    - appimage_install: False
+    - packages_repo_install: False
+    - package_vim_install: True
+    - install_user: "uzanto"
+    - install_password: "user_admin5"
+    - inventory_hostname: "Debian_master"
+    - deb_stable: "bullseye"
+
+    - hostname:
+    - zabbix_server_ip: Monit01.e3s.intranet
+  vars_files:
+    - "../credentials/credentials.yml"
+  become: yes
+  collections:
+    - Groupe3.LinuxConfiguration
+    - Groupe3.LinuxSecure
+  roles:
+    - Groupe3.LinuxConfiguration.Base_install
+    - Groupe3.LinuxConfiguration.Package_install
+    - Groupe3.LinuxConfiguration.ZSH_configuration
+    - Groupe3.LinuxSecure.SSH_configuration
+  
+
+      #  tasks:
+      #    - name: import role for securing redhat 'os_family'
+      #      import_role:
+      # - name:
+      #     - Groupe3.LinuxSecure.Firewalld_configuration
+       #   - Groupe3.LinuxSecure.Selinux_configuration
+       #  when: ansible_facts['os_family']|lower == 'redhat'
+
+       #    - name: Set a hostname
+       # ansible.builtin.hostname:
+       # - name: "{{ ansible.hostname }}"
+
+    # - name: Add Computer to active directory
+    #   community_windows.win_domain_computer:
+    #     name: "{{ hostname }}"
+    #     dns_hostname: "{{ hostname }}"
+    #     ou: "ou={{ ou }}, dc={{ dc1 }}, dc={{ dc2 }}"
+    #     enabled: yes
+    #     state: present
+    #   delegate_to: AD01
+
+    # - name: import role for install zabbix
+    #   import_role:
+    #     name:
+    #       - Forkuranto.zabbix.AgentInstall
+    
+    # - name: import role for config zabbix
+    #   import_role:
+    #     name:
+    #       - Forkuranto.zabbix.AgentConfig
+    
+    
+
+

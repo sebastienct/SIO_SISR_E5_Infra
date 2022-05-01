@@ -1,0 +1,30 @@
+---
+- name: 'Integration de poste linux dans AD'
+  hosts: VM
+  vars:
+    - AD_domain: "e3s.intranet"
+    - 
+
+
+
+  tasks:
+    - name:  Set a hostname
+      hostname:
+        name: "{{ inventory_hostname }}.{{ AD_domain }}"
+    - name: install packages for add to AD
+      package:
+        name:
+          - realmd
+          - libnss-sss
+          - libpam-sss
+          - sssd
+          - sssd-tools
+          - adcli
+          - samba-common-bin
+          - oddjob
+          - oddjob-mkhomedir
+          - packagekit
+        state: present
+      when: ansible_facts['os_family']|lower == 'debian'
+
+    

@@ -1,0 +1,14 @@
+---
+- name: "Create user in AD"
+  hosts: AD01
+  vars_files:
+    - credentials.yml
+  tasks:
+    - name: create user is present in OU ou=test,dc=domain,dc=local
+      community.windows.win_domain_user:
+        name: support
+        password: B0b_P4ssw0rd
+        state: present
+        path: ou=Technique,dc=e3s,dc=intranet
+        groups:
+          - mail_client

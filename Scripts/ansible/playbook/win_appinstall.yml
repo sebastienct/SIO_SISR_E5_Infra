@@ -1,0 +1,20 @@
+---
+- name: "Install app"
+  hosts: {{ target }}
+  vars_files:
+    - credentials.yml
+    - winPackages.yml
+  tasks:
+    
+    - name: "install app for windows"
+      block:
+        - name: download package
+          win_get_url:
+            path: "{{ item.src }}"
+            dest: "C:\temp\{{ item.name }}.{{ item.type }}"
+        - name: install package
+          ansible.windows.win_package:
+            path: "C:\temp\{{ item.name }}.{{ item.type }}"
+            state: present
+      with_items:
+        - "{{ win_packages }}"
