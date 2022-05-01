@@ -1,0 +1,62 @@
+---
+# Join AD to domain
+- name: Join a computer to AD
+  hosts: "{{ target }}"
+  gather_facts: no
+  vars_files:
+    - "../credentials/credentials.yml"
+  vars: 
+    - domain_ad: e3s.intranet
+  tasks:
+    - name: config block
+      block:
+        - name: change the hostname of the computer
+          ansible.windows.win_hostname:
+            name: "{{ inventory_hostname }}"
+          register: hostname_state
+  
+        - ansible.windows.win_reboot:
+          when: hostname_state.reboot_required
+  
+        - name: Wait for the reboot to complete if there was a change.
+          wait_for_connection:
+            timeout: 180
+          when: hostname_state is changed
+  
+        - name: Add the computer to an OU
+          ansible.windows.win_domain_membership:
+            dns_domain_name: '{{ domain_ad }}'
+            hostname: "{{ inventory_hostname }}"
+            domain_admin_user: '{{ AD_user }}'
+            domain_admin_password: '{{ AD_password }}'
+            domain_ou_path: '{{ domain_ou }}'
+            state: domain
+          register: domain_stat
+  
+        - ansible.windows.win_reboot:
+          when: domain_stat.reboot_required
+  
+        - name: Wait for the reboot to complete if there was a change.
+          wait_for_connection:
+          timeout: 180
+          when: domain_stat is changed
+  
+        - name: Add a computer to a domain group
+          win_domain_group_membership:
+            name: "{{ item }}"
+            domain_username: "{{ AD_user }}"
+            domain_password: "{{ AD_password }}"
+            members:
+              - "{{ inventory_hostname }}$"
+            state: present
+          delegate_to: AD01
+          with_items:
+            - "{{ group }}"
+  
+        - name: Create database server record
+          community.windows.win_dns_record:
+            name: "{{ inventory_hostname }}"
+            type: "A"
+            value: "{{ ansible_host }}"
+            zone: "{{ domain_ad }}"
+          delegate_to: AD01
