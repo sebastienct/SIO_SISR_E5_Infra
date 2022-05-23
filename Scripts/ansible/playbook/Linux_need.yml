@@ -18,7 +18,7 @@
         - name: changement de nom
           hostname:
             name: '{{ hostname }}'
-
+          become: yes
         - name: Create database server record
           community.windows.win_dns_record:
             name: "{{ inventory_hostname }}"
@@ -26,7 +26,6 @@
             value: "{{ ansible_host }}"
             zone: "{{ domain_ad }}"
           delegate_to: AD01
-      become: yes
      
     
     - name: Zabbix Agent

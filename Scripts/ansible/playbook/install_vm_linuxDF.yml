@@ -11,7 +11,7 @@
     - package_vim_install: True
     - install_user: "uzanto"
     - install_password: "user_admin5"
-    - inventory_hostname: "Debian_master"
+    - inventory_hostname: "{{ target }}"
     - deb_stable: "bullseye"
 
     - hostname:

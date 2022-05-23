@@ -1,0 +1,20 @@
+---
+- name: suppression utilisateur
+  hosts: "{{ target }}" 
+  tasks:
+    - name: Read users from CSV file and return a list
+      community.general.read_csv:
+        path: AD_user.csv
+        fieldnames: Nom,Prenom,Group,Account,Path,Password,State
+        delimiter: ';'
+      register: userlist
+      delegate_to: localhost
+
+    - name: delete user
+      ansible.windows.win_domain_user:
+        name: "{{ user.Account }}"
+        state: "{{ user.State }}"
+      loop: "{{ userlist.list }}"
+      loop_control:
+        loop_var: user
+      ignore_errors: true

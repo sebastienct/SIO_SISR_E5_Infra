@@ -4,11 +4,33 @@
   vars_files:
     - credentials.yml
   tasks:
-    - name: create user is present in OU ou=test,dc=domain,dc=local
-      community.windows.win_domain_user:
-        name: support
-        password: B0b_P4ssw0rd
-        state: present
-        path: ou=Technique,dc=e3s,dc=intranet
+#    - name: create user is present in OU ou=test,dc=domain,dc=local
+#      community.windows.win_domain_user:
+#        name: support
+#        password: B0b_P4ssw0rd
+#        state: present
+#        path: ou=Technique,dc=e3s,dc=intranet
+#        groups:
+#          - mail_client
+    - name: Read users from CSV file and return a list
+      community.general.read_csv:
+        path: AD_user.csv
+        fieldnames: Nom,Prenom,Group,Account,Path,Password,State
+        delimiter: ';'
+      register: userlist
+      delegate_to: localhost
+      
+      
+    - name: delete user
+      ansible.windows.win_domain_user:
+        name: "{{ user.Account }}"
+        state: "{{ user.State }}"
+        password: "{{ user.Paswword }}"
+        path: "{{ user.Path }}"
         groups:
-          - mail_client
+          - "{{user.Groups }}"
+      loop: "{{ userlist.list }}"
+      loop_control:
+        loop_var: user
+      ignore_errors: true
+      when: user.State == present
