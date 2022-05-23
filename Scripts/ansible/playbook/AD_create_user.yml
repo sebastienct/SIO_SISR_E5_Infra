@@ -33,4 +33,4 @@
       loop_control:
         loop_var: user
       ignore_errors: true
-      when: user.State == absent
+      when: user.State == present
