@@ -1,0 +1,8 @@
+- name: "Configuration d'un poste Linux pour E3S"
+  hosts: "{{ target }}"
+  vars_files:
+    - ../credentials/credentials.yml
+  tasks:
+    - name: recup facts
+      ansible.builtin.debug:
+        var: ansible_facts
