@@ -11,7 +11,7 @@
       delegate_to: localhost
 
     - name: delete user
-      ansible.windows.win_user:
+      ansible.windows.win_domain_user:
         name: "{{ user.Account }}"
         state: "{{ user.State }}"
       loop: "{{ userlist.list }}"
