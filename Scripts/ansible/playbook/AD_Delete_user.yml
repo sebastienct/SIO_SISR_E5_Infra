@@ -1,6 +1,6 @@
 ---
 - name: suppression utilisateur
-  hosts: "{{ var }}" 
+  hosts: "{{ target }}" 
   tasks:
     - name: Read users from CSV file and return a list
       community.general.read_csv:
